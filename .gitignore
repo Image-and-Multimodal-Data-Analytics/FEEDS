@@ -27,6 +27,7 @@ var/
 
 *.err 
 *.out
+**.nii.gz
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

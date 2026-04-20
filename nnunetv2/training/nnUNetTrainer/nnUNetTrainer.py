@@ -492,6 +492,7 @@ class nnUNetTrainer(object):
                 print(*args)
         elif also_print_to_console:
             print(*args)
+        sys.stdout.flush()
 
     def print_plans(self):
         if self.local_rank == 0:
@@ -511,6 +512,8 @@ class nnUNetTrainer(object):
     def plot_network_architecture(self):
         if self._do_i_compile():
             self.print_to_log_file("Unable to plot network architecture: nnUNet_compile is enabled!")
+            import sys
+            sys.stdout.flush()
             return
 
         if self.local_rank == 0:
@@ -619,6 +622,7 @@ class nnUNetTrainer(object):
 
     def get_dataloaders(self):
         patch_size = self.configuration_manager.patch_size
+        print(patch_size)
         dim = len(patch_size)
 
         # needed for deep supervision: how much do we need to downscale the segmentation targets for the different
@@ -912,6 +916,8 @@ class nnUNetTrainer(object):
 
         self.print_plans()
         empty_cache(self.device)
+        
+
 
         # maybe unpack
         if self.unpack_dataset and self.local_rank == 0:
@@ -944,7 +950,6 @@ class nnUNetTrainer(object):
         # This will lead to the wrong current epoch to be stored
         self.current_epoch -= 1
         self.save_checkpoint(join(self.output_folder, "checkpoint_final.pth"))
-        self.current_epoch += 1
 
         # now we can delete latest
         if self.local_rank == 0 and isfile(join(self.output_folder, "checkpoint_latest.pth")):
@@ -1140,6 +1145,15 @@ class nnUNetTrainer(object):
         if (current_epoch + 1) % self.save_every == 0 and current_epoch != (self.num_epochs - 1):
             self.save_checkpoint(join(self.output_folder, 'checkpoint_latest.pth'))
 
+        if current_epoch == 280: 
+            self.save_checkpoint(join(self.output_folder, 'checkpoint_epoch_280.pth'))
+            self.perform_actual_validation(save_probabilities=True)
+        
+        if current_epoch == 400: 
+            self.save_checkpoint(join(self.output_folder, 'checkpoint_epoch_400.pth'))
+            self.perform_actual_validation(save_probabilities=True)
+
+
         # handle 'best' checkpointing. ema_fg_dice is computed by the logger and can be accessed like this
         if self._best_ema is None or self.logger.my_fantastic_logging['ema_fg_dice'][-1] > self._best_ema:
             self._best_ema = self.logger.my_fantastic_logging['ema_fg_dice'][-1]
@@ -1181,7 +1195,7 @@ class nnUNetTrainer(object):
             self.initialize()
 
         if isinstance(filename_or_checkpoint, str):
-            checkpoint = torch.load(filename_or_checkpoint, map_location=self.device)
+            checkpoint = torch.load(filename_or_checkpoint, map_location=self.device, weights_only=False)
         # if state dict comes from nn.DataParallel but we use non-parallel model here then the state dict keys do not
         # match. Use heuristic to make it match
         new_state_dict = {}

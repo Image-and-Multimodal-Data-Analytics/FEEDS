@@ -11,6 +11,7 @@ from typing import Tuple, Union, List
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from batchgenerators.dataloading.multi_threaded_augmenter import MultiThreadedAugmenter
 from batchgenerators.dataloading.nondet_multi_threaded_augmenter import NonDetMultiThreadedAugmenter
 from batchgenerators.dataloading.single_threaded_augmenter import SingleThreadedAugmenter
@@ -42,6 +43,7 @@ from torch._dynamo import OptimizedModule
 from torch.cuda import device_count
 from torch.cuda.amp import GradScaler
 from torch.nn.parallel import DistributedDataParallel as DDP
+import torch.nn.functional as F
 
 from nnunetv2.configuration import ANISO_THRESHOLD, default_num_processes
 from nnunetv2.evaluation.evaluate_predictions import compute_metrics_on_folder
@@ -77,8 +79,11 @@ class autoPET3_Trainer(nnUNetTrainer):
     def __init__(self, plans: dict, configuration: str, fold: int, dataset_json: dict, unpack_dataset: bool = True,
                  device: torch.device = torch.device('cuda')):
         super().__init__(plans, configuration, fold, dataset_json, unpack_dataset, device)
-        self.num_epochs = 1500
+        self.num_epochs = 500
         self.initial_lr = 1e-3
+        self.print_to_log_file("Number of epochs for training: %d" % self.num_epochs,
+                        also_print_to_console=True, add_timestamp=False)
+        
 
     @staticmethod
     def get_training_transforms(
@@ -310,12 +315,91 @@ class autoPET3_Trainer(nnUNetTrainer):
                                     num_images_properties_loading_threshold=0)
         return dataset_tr, dataset_val
 
+    def uncertainty_focal_bce(self, logits, target, U, gamma=2.0, beta=1.0):
+        """
+        beta controls how strongly U amplifies the focal term.
+        """
+        
+        probs = F.softmax(logits,dim=1)
+        seg = probs.argmax(dim=1).unsqueeze(1)
+        # standard focal factor on error: |p - y|
+        err = torch.abs(seg - target)
+        mod = (err.clamp(1e-6, 1-1e-6) ** gamma) * (1.0 + beta * U)  # ↑ with err and U
+        #bce = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
+        ce = F.cross_entropy(logits, target.squeeze(1).long(), reduction="none").unsqueeze(1)
+        return (mod * ce).mean()
+    
+    def kl_loss(self, logits, teacher_probs, weights=None):
+        """
+        beta controls how strongly U amplifies the focal term.
+        """
+        eps = 1e-8
+        student_probs = F.softmax(logits,dim=1)[:,1:2,...]
+
+        t = teacher_probs.clamp(min=eps, max=1 - eps)
+        s = student_probs.clamp(min=eps, max=1 - eps)
+
+
+        kl = (t * (t.add(eps).log() - s.add(eps).log()))
+        #This is for masked out KL loss
+        #print('I am printing KL loss without and with mean',flush=True)
+        #print(kl.mean(),flush=True)
+        if weights is not None:
+            kl = kl * weights
+            #print(kl.mean(),flush=True)
+        return kl.mean() 
+
+    @staticmethod
+    def compute_error_masks(teacher_probs, tgt, threshold=None):
+
+        """
+        Build teacher FP/FN masks (hard by default via argmax; optional threshold for binary).
+         - FP: teacher predicts foreground but target is background
+         - FN: teacher predicts background but target is foreground
+        Returns:
+        FP_mask, FN_mask, ERR_mask (union), OK_mask (complement)
+        Shapes: masks are [B,1,...], float.
+        """
+        # threshold on foreground prob for 'pred'
+        pred = (teacher_probs >= threshold).long()  # [B,...]
+        # Binary aware: define background=0, foreground=1
+        is_bg = (tgt == 0)
+        is_fg = (tgt != 0)  # works for multi-class: foreground = any non-zero
+        pred_bg = (pred == 0)
+        pred_fg = (pred != 0)
+        FP = (pred_fg & is_bg).float()  # [B,1,...]
+        FN = (pred_bg & is_fg).float()
+        ERR = torch.clamp(FP + FN, max=1.0)
+        OK = 1.0 - ERR
+        #print(ERR.shape)
+        #print(OK.shape)
+        return FP, FN, ERR, OK
+
+
+    def uncertainty_exp_mse(self, logits, target, U, gamma=2.0, beta=1.0):
+        """
+        beta controls how strongly U amplifies the focal term.
+        """
+        
+        probs = F.softmax(logits,dim=1)
+        seg = probs.argmax(dim=1).unsqueeze(1)
+        # standard focal factor on error: |p - y|
+        sq_err = (seg - target)**2
+        return (torch.exp(-U) * sq_err).mean()
 
     def train_step(self, batch: dict) -> dict:
         data = batch['data']
         target = batch['target']
+        #uncer = batch['uncer']
+        #prob = batch['prob']
 
         data = data.to(self.device, non_blocking=True)
+        #uncer = uncer.to(self.device, non_blocking=True)
+        #prob = prob.to(self.device, non_blocking=True)
+        #The target segmentation contains a downscaled verson of the uncertainty. So we need to ds too (Bashirul) 
+        #ds_uncer = F.interpolate(uncer, scale_factor=(0.5,0.5,0.5),mode="trilinear", align_corners=False)
+        #ds_prob = F.interpolate(prob, scale_factor=(0.5,0.5,0.5),mode="trilinear", align_corners=False)
+
         if isinstance(target, list):
             target = [(i[:,:1].to(self.device, non_blocking=True), i[:,1:].to(self.device, non_blocking=True)) for i in target]
             target, target_organs = zip(*target)
@@ -338,10 +422,38 @@ class autoPET3_Trainer(nnUNetTrainer):
         # If the device_type is 'mps' then it will complain that mps is not implemented, even if enabled=False is set. Whyyyyyyy. (this is why we don't make use of enabled=False)
         # So autocast will only be active if we have a cuda device.
         with autocast(self.device.type, enabled=True) if self.device.type == 'cuda' else dummy_context():
+            #print('I am inside training', flush=True)
             output, organ_output = self.network(data, organ=True)
+            #print(data.shape, flush=True)
+            #print(output[0].shape, flush=True)
+            #print(len(output))
+            #print(len(target))
+            #print(target[0].shape)
+
+            #print('I am printing just before loss')
+            #print(output[0].shape, flush=True)
+            #print(output[1].shape, flush=True)
+            #print(target[0].shape, flush=True)
+            #print(target[1].shape, flush=True)
+
             # del data
-            l = self.loss(output, target)
+            #_, _, ERR, OK = self.compute_error_masks(prob,target[0], threshold=0.5) 
+            #_, _, ds_ERR, ds_OK = self.compute_error_masks(ds_prob,target[1], threshold=0.5)
+            #l = self.loss(output, target)
+            #This is where we tried the mask filtered CE and DICE loss function. We want to focus on the FP and FN cases from the teacher probs
+            l = self.loss(output,target) 
+            #This is where we tried the uncertainy weighted CE loss function from a pretrained function with no weights 
+            #l = self.loss(output, target, [uncer, ds_uncer] ) # Segmentation takes two tensors of original and downsampled size (Bashirul)
             l += self.loss(organ_output, target_organs)
+            
+            #Uncertainty loss from Bashirul 
+            #l += self.kl_loss(output[0], prob)
+            #l += self.kl_loss(output[1], ds_prob)
+
+            #Uncertainty loss from Bashirul 
+            #l += self.uncertainty_focal_bce(output[0], target[0], uncer)
+            #l += self.uncertainty_focal_bce(output[1], target[1], ds_uncer) # Output and target has two components: one full size, one downsampled
+            #l += self.uncertainty_exp_mse(output[0], target[0], uncer.to(self.device, non_blocking=True))
 
         if self.grad_scaler is not None:
             self.grad_scaler.scale(l).backward()
@@ -449,7 +561,8 @@ class autoPET3_Trainer(nnUNetTrainer):
 
         with multiprocessing.get_context("spawn").Pool(default_num_processes) as segmentation_export_pool:
             worker_list = [i for i in segmentation_export_pool._pool]
-            validation_output_folder = join(self.output_folder, 'validation')
+            # added part to show validation for a specific step
+            validation_output_folder = join(self.output_folder, f'validation_{self.current_epoch}')
             maybe_mkdir_p(validation_output_folder)
 
             # we cannot use self.get_tr_and_val_datasets() here because we might be DDP and then we have to distribute
