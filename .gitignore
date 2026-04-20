@@ -23,6 +23,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+.pip_cache/
+
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -99,6 +101,7 @@ ENV/
 *.txt
 .idea/*
 *.png
+# *.nii.gz  # nifti files needed for example_data for github actions tests
 *.nii
 *.tif
 *.bmp
@@ -113,3 +116,7 @@ ENV/
 *.model
 
 !documentation/assets/scribble_example.png
+
+*.csv
+*.xml
+*.png
