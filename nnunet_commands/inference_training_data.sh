@@ -42,10 +42,10 @@ echo "==============================="
 # -----------------------------------------------------------------------------
 # Syntax: nnUNetv2_train <dataset_name_or_id> <configuration> <fold> [--npz]
 
-fold_name="fold_3"
+fold_name="fold_4"
 
 nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/train_link/" \
-                -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_predictions" \
+                -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_predictions/predictions" \
                 -d 999 \
                 -tr autoPET3_Trainer \
                 -p nnUNetResEncUNetLPlansMultiTalent \

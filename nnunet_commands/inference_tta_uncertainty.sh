@@ -17,17 +17,17 @@
 # =============================================================================
 # Basic Slurm directives
 # =============================================================================
-#SBATCH --job-name=predict_tta_unc     # Descriptive job name
+#SBATCH --job-name=predict_bad_tta     # Descriptive job name
 #SBATCH --account=bhattacharya-lab
 #SBATCH --nodes=1                       # Request 1 node
 #SBATCH --ntasks-per-node=1            # Number of tasks per node
 #SBATCH --gres=gpu:1
 #SBATCH --partition=l40s_indrani        # Partition (queue) name on your cluster
-#SBATCH --time=1-12:00:00               # Walltime (days-HH:MM:SS) 
-#SBATCH --nodelist=adanova01
+#SBATCH --time=1-5:20:00               # Walltime (days-HH:MM:SS) 
+# # SBATCH --nodelist=adanova01
 #SBATCH --mem=60G                      # Memory request: 32 GB
-#SBATCH --output=predict_tta_unc_%j.out  # Standard output log file
-#SBATCH --error=predict_tta_unc_%j.err   # Standard error log file
+#SBATCH --output=predict_bad_tta_%j.out  # Standard output log file
+#SBATCH --error=predict_bad_tta_%j.err   # Standard error log file
 
 
 # =============================================================================
@@ -60,21 +60,20 @@ IMAGE_NAME=".nii.gz"
 
 #!/bin/bash
 
-fold_name="fold_0"
+fold_name="fold_0_10"
 checkpoint_name="best"
 MODEL_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres"
-INPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/train_link/"
-OUTPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta_predicted/" 
+INPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/bad_files_subset/"
+OUTPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta_predicted_bad_subset/" 
 
 python ../nnunetv2/inference/predict_TTA.py \
-    --continue_prediction \
     -i $INPUT_DIR \
     -o $OUTPUT_DIR \
     -d 999 \
     -tr autoPET3_Trainer \
     -p nnUNetResEncUNetLPlansMultiTalent \
     -c 3d_fullres \
-    -f 2 \
+    -f 0 \
     -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth" \
     --save_probabilities \
     --disable_tta 

@@ -4,12 +4,12 @@
 # Basic Slurm directives
 # -----------------------------------------------------------------------------
 
-#SBATCH --job-name=inference_validation_f3    # Descriptive job name
-#SBATCH --account=bhattacharya-lab
+#SBATCH --job-name=f6_val   # Descriptive job name
+#SBATCH --account=bhattacharya-lab  
 #SBATCH --nodes=1                     # Request 1 node
 #SBATCH --ntasks-per-node=1          # Number of tasks per node
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpuq         # Partition (queue) name on your cluster
+#SBATCH --partition=l40s_indrani         # Partition (queue) name on your cluster
 #SBATCH --time=1-23:00:00              # Walltime (HH:MM:SS) 
 #SBATCH --mem=32G                    # Memory request: 16 GB
 
@@ -40,17 +40,18 @@ echo "==============================="
 # -----------------------------------------------------------------------------
 # Syntax: nnUNetv2_train <dataset_name_or_id> <configuration> <fold> [--npz]
 
-fold_name="fold_1"
+fold_name="fold_6"
 checkpoint_name="best"
 
-nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_10_ens_0_org/val/images" \
-                -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_280" \
-                -d 999 \
+nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \
+                -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_no_mirror" \
+                -d 901 \
                 -tr autoPET3_Trainer \
                 -p nnUNetResEncUNetLPlansMultiTalent \
                 -c 3d_fullres \
-                -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
+                -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
                 --save_probabilities --disable_tta
+
 
 
 # If you want to train multiple folds in one script, you could do something like:

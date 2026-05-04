@@ -25,5 +25,6 @@ fi
 # 3) Merge the two 3D-preprocessed datasets
 # nnUNetv2_merge_lesion_and_organ_dataset -l 888 -o 200
 # nnUNetv2_merge_lesion_and_organ_dataset -l 777 -o 200
-nnUNetv2_merge_lesion_and_organ_dataset -l 999 -o 200
+# nnUNetv2_merge_lesion_and_organ_dataset -l 333 -o 200
 
+python ../nnunetv2/preprocessing/organ_extraction/combine_lesion_and_organs.py -l 333 -o 200
