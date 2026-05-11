@@ -74,25 +74,14 @@ from nnunetv2.training.nnUNetTrainer.nnUNetTrainer import nnUNetTrainer
 from nnunetv2.training.data_augmentation.custom_transforms.custom_transforms import Misalign2
 
 
-class autoPET3_Trainer(nnUNetTrainer):
+class autoPET3_Trainer_Patch_Based(nnUNetTrainer):
     os.environ["STEM"] = "autoPET"
     def __init__(self, plans: dict, configuration: str, fold: int, dataset_json: dict, unpack_dataset: bool = True,
                  device: torch.device = torch.device('cuda')):
-        # SETTING A SEED
-        seed = 42
-        torch.manual_seed(seed)
-        
         super().__init__(plans, configuration, fold, dataset_json, unpack_dataset, device)
-        self.num_epochs = 280
+        self.num_epochs = 1500
         self.initial_lr = 1e-3
 
-        
-        self.print_to_log_file("Number of epochs for training: %d" % self.num_epochs,
-                        also_print_to_console=True, add_timestamp=False)
-        self.print_to_log_file("Initial learning rate: %f" % self.initial_lr,
-                        also_print_to_console=True, add_timestamp=False)
-        self.print_to_log_file("Seeding with %d" % seed, also_print_to_console=True, add_timestamp=False)
-        
     @staticmethod
     def get_training_transforms(
             patch_size: Union[np.ndarray, Tuple[int]],
@@ -398,6 +387,9 @@ class autoPET3_Trainer(nnUNetTrainer):
     def train_step(self, batch: dict) -> dict:
         data = batch['data']
         target = batch['target']
+        keys = batch['keys']
+        print(f"Training on batch with keys: {keys}", flush=True)
+        
         #uncer = batch['uncer']
         #prob = batch['prob']
 
@@ -569,8 +561,7 @@ class autoPET3_Trainer(nnUNetTrainer):
 
         with multiprocessing.get_context("spawn").Pool(default_num_processes) as segmentation_export_pool:
             worker_list = [i for i in segmentation_export_pool._pool]
-            # added part to show validation for a specific step
-            validation_output_folder = join(self.output_folder, f'validation_{self.current_epoch}')
+            validation_output_folder = join(self.output_folder, 'validation')
             maybe_mkdir_p(validation_output_folder)
 
             # we cannot use self.get_tr_and_val_datasets() here because we might be DDP and then we have to distribute
@@ -658,3 +649,34 @@ class autoPET3_Trainer(nnUNetTrainer):
 
         self.set_deep_supervision_enabled(True)
         compute_gaussian.cache_clear()
+        
+        
+    def run_training(self): 
+        self.on_train_start()
+        print("Starting training...", flush=True)
+        self.print_to_log_file(f"Starting the training")
+        
+        for epoch in range(self.current_epoch, self.num_epochs):
+            self.on_epoch_start()
+
+            self.on_train_epoch_start()
+            train_outputs = []
+            for batch_id in range(self.num_iterations_per_epoch):
+                batch = next(self.dataloader_train)
+                print(f"Processing batch {batch_id + 1}/{self.num_iterations_per_epoch} of epoch {epoch + 1}/{self.num_epochs}", flush=True)
+                print(batch['keys'], flush=True)
+                # train_outputs.append(self.train_step(next(self.dataloader_train)))
+                break
+            self.on_train_epoch_end(train_outputs)
+
+            with torch.no_grad():
+                self.on_validation_epoch_start()
+                val_outputs = []
+                for batch_id in range(self.num_val_iterations_per_epoch):
+                    val_outputs.append(self.validation_step(next(self.dataloader_val)))
+                self.on_validation_epoch_end(val_outputs)
+
+            self.on_epoch_end()
+
+        self.on_train_end()
+

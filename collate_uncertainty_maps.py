@@ -7,9 +7,9 @@ from glob import glob
 # --- Configuration ---
 epsilon = 1e-8
 mode = 'train'
-base_dir = "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_2_mg/"
+base_dir = "//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/"
 
-COMBINED_FOLDER_NAME = "train_tta_predicted"
+COMBINED_FOLDER_NAME = "train_tta_predicted_bad_subset"
 
 # --- Input: folder containing existing raw uncertainty maps ---
 uncer_raw_dir = os.path.join(base_dir, COMBINED_FOLDER_NAME, 'uncertainty_maps')
@@ -47,37 +47,37 @@ percentile_tracker = {
 }
 
 # load global stats from the pkl file if available
-stats_path = os.path.join(uncer_norm_dir, "global_uncertainty_stats.pkl")
-if os.path.exists(stats_path):
-    with open(stats_path, 'rb') as f:
-        saved_stats = pickle.load(f)
-        global_stats = saved_stats.get("global_stats", global_stats)
-        percentile_tracker = saved_stats.get("percentile_tracker", percentile_tracker)
-    print(f"Loaded existing global stats from:\n  {stats_path}")
+# stats_path = os.path.join(uncer_norm_dir, "global_uncertainty_stats.pkl")
+# if os.path.exists(stats_path):
+#     with open(stats_path, 'rb') as f:
+#         saved_stats = pickle.load(f)
+#         global_stats = saved_stats.get("global_stats", global_stats)
+#         percentile_tracker = saved_stats.get("percentile_tracker", percentile_tracker)
+#     print(f"Loaded existing global stats from:\n  {stats_path}")
 
-# for case_id in case_ids:
-#     print(f"  [Pass 1] {case_id}")
+for case_id in case_ids:
+    print(f"  [Pass 1] {case_id}")
 
-#     for name in uncertainty_types:
-#         raw_path = os.path.join(uncer_raw_dir, f"{case_id}_{name}.nii.gz")
+    for name in uncertainty_types:
+        raw_path = os.path.join(uncer_raw_dir, f"{case_id}_{name}.nii.gz")
 
-#         if not os.path.exists(raw_path):
-#             print(f"    WARNING: Missing {raw_path}, skipping.")
-#             continue
+        if not os.path.exists(raw_path):
+            print(f"    WARNING: Missing {raw_path}, skipping.")
+            continue
 
-#         raw_img = sitk.ReadImage(raw_path)
-#         array = sitk.GetArrayFromImage(raw_img).astype(np.float32)
+        raw_img = sitk.ReadImage(raw_path)
+        array = sitk.GetArrayFromImage(raw_img).astype(np.float32)
 
-#         # Update global min/max
-#         arr_min, arr_max = float(np.min(array)), float(np.max(array))
-#         global_stats[name]["min"] = min(global_stats[name]["min"], arr_min)
-#         global_stats[name]["max"] = max(global_stats[name]["max"], arr_max)
+        # Update global min/max
+        arr_min, arr_max = float(np.min(array)), float(np.max(array))
+        global_stats[name]["min"] = min(global_stats[name]["min"], arr_min)
+        global_stats[name]["max"] = max(global_stats[name]["max"], arr_max)
 
-#         # Track per-case percentiles
-#         percentile_tracker[name]["p1_vals"].append(float(np.percentile(array, 1)))
-#         percentile_tracker[name]["p99_vals"].append(float(np.percentile(array, 99)))
-#         percentile_tracker[name]["means"].append(float(np.mean(array)))
-#         percentile_tracker[name]["stds"].append(float(np.std(array)))
+        # Track per-case percentiles
+        percentile_tracker[name]["p1_vals"].append(float(np.percentile(array, 1)))
+        percentile_tracker[name]["p99_vals"].append(float(np.percentile(array, 99)))
+        percentile_tracker[name]["means"].append(float(np.mean(array)))
+        percentile_tracker[name]["stds"].append(float(np.std(array)))
 
 # --- Compute normalization bounds ---
 print("\n--- Global Statistics ---")

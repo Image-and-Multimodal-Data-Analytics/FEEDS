@@ -91,6 +91,9 @@ class nnUNetPredictor(object):
 
             parameters.append(checkpoint['network_weights'])
 
+        # print the checkpoint_epoch
+        self.print_to_log_file(f"Checkpoint epoch: {checkpoint['epoch']}")
+        
         configuration_manager = plans_manager.get_configuration(configuration_name)
         # restore network
         num_input_channels = determine_num_input_channels(plans_manager, configuration_manager, dataset_json)

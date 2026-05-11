@@ -13,7 +13,7 @@ epsilon = 1e-8
 mode = 'train'
 base_dir = "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/"
 
-COMBINED_FOLDER_NAME = "fold_10_ens_global_comb_train_results"
+COMBINED_FOLDER_NAME = "fold_10_ensemble_results"
 
 ens_dirs = [os.path.join(base_dir, f"fold_{i}", mode + '_predictions') for i in range(5)]
 
@@ -27,7 +27,7 @@ os.makedirs(combined_dir, exist_ok=True)
 os.makedirs(uncer_dir, exist_ok=True)
 os.makedirs(uncer_raw_dir, exist_ok=True)
 
-npz_files = sorted(glob(os.path.join(ens_dirs[0], "*.npz")))
+npz_files = sorted(glob(os.path.join(ens_dirs[1], "*.npz")))
 case_ids = [os.path.basename(f).replace(".npz", "") for f in npz_files]
 print(f'Processing {len(case_ids)} files')
 

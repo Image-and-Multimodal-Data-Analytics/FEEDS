@@ -1147,11 +1147,9 @@ class nnUNetTrainer(object):
 
         if current_epoch == 280: 
             self.save_checkpoint(join(self.output_folder, 'checkpoint_epoch_280.pth'))
-            self.perform_actual_validation(save_probabilities=True)
         
         if current_epoch == 400: 
             self.save_checkpoint(join(self.output_folder, 'checkpoint_epoch_400.pth'))
-            self.perform_actual_validation(save_probabilities=True)
 
 
         # handle 'best' checkpointing. ema_fg_dice is computed by the logger and can be accessed like this

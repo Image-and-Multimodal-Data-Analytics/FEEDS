@@ -18,11 +18,11 @@
 # Basic Slurm directives
 # =============================================================================
 #SBATCH --job-name=predict_bad_tta     # Descriptive job name
-#SBATCH --account=bhattacharya-lab
+#SBATCH --account=free
 #SBATCH --nodes=1                       # Request 1 node
 #SBATCH --ntasks-per-node=1            # Number of tasks per node
 #SBATCH --gres=gpu:1
-#SBATCH --partition=l40s_indrani        # Partition (queue) name on your cluster
+#SBATCH --partition=gpuq        # Partition (queue) name on your cluster
 #SBATCH --time=1-5:20:00               # Walltime (days-HH:MM:SS) 
 # # SBATCH --nodelist=adanova01
 #SBATCH --mem=60G                      # Memory request: 32 GB
@@ -63,10 +63,11 @@ IMAGE_NAME=".nii.gz"
 fold_name="fold_0_10"
 checkpoint_name="best"
 MODEL_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres"
-INPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/bad_files_subset/"
+INPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/train_link/"
 OUTPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta_predicted_bad_subset/" 
 
 python ../nnunetv2/inference/predict_TTA.py \
+    --continue_prediction \
     -i $INPUT_DIR \
     -o $OUTPUT_DIR \
     -d 999 \

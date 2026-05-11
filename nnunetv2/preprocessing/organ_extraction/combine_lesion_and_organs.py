@@ -38,6 +38,4 @@ def merge_datasets_entry_point():
     args = parser.parse_args()
     merge_lesions_and_organ_dataset(args.lesion_dataset_id, args.organ_dataset_id)
 
-
-if __name__ == "__main__":
-    merge_lesions_and_organ_dataset(610, 612)
+merge_datasets_entry_point()

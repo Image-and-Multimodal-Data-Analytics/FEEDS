@@ -6,7 +6,7 @@ print(os.getcwd())
 
 SPLITS_DIR = '/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset999_AutoPet/splits_final.json'
 TRAIN_FILES_DIR = '/dartfs/rc/lab/B/BhattacharyaI/Public_Datasets/Autopet_III_nnunet_raw/Dataset888_AutoPet/labelsTr'
-TRAIN_LINK_DIR = '/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/hard_labels/'
+TRAIN_LINK_DIR = '/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/val_labels/'
 # Load the json
 
 
@@ -17,6 +17,7 @@ with open(SPLITS_DIR, 'r') as f:
 # Get labelled and all filenames
 labelled = set(splits[0]['train'])
 all_files = set(splits[6]['train'])
+val_files = set(splits[0]['val'])
 
 # Get unlabelled only
 unlabelled = all_files - labelled
@@ -63,7 +64,7 @@ def fname_is_label(fname):
         print(f'File not found: {os.path.basename(src)}')
 
 
-for fname in labelled: 
+for fname in val_files: 
     fname_is_label(fname)
     # fname_is_image(fname)
-print(f'Done! Created {len(labelled)} symlinks in {output_dir}')
+print(f'Done! Created {len(val_files)} symlinks in {output_dir}')

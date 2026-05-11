@@ -1,11 +1,11 @@
 #!/bin/bash
 
-#SBATCH --job-name=get_ensemble
+#SBATCH --job-name=convert_npy
 #SBATCH --account=bhattacharya-lab
 #SBATCH --partition=l40s_indrani
 #SBATCH --gres=gpu:1
-#SBATCH --output=create_ensemble_results_%j.out
-#SBATCH --error=create_ensemble_results_%j.err
+#SBATCH --output=convert_npy_%j.out
+#SBATCH --error=convert_npy_%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --time=1-00:00:00
@@ -22,5 +22,5 @@ fi
 
 
 # 2) Preprocess a new dataset 
-python create_ensemble_results_global.py
+python convert_to_npy.py
 

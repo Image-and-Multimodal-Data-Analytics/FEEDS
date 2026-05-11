@@ -34,10 +34,14 @@ echo "==============================="
 # source activate nnunet_env
 
 # for fold in fold_10_ens_0 fold_10_ens_1 fold_10_ens_2 fold_10_ens_3 fold_10_ens_4; do
-for fold in fold_6; do
+
+input_dataset="Dataset903_AutoPet"
+validation="validation_279"
+
+for fold in fold_0 fold_1 ; do
   nnUNetv2_evaluate_folder \
-    -djfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \
-    -pfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/plans.json \
+    -djfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \
+    -pfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/plans.json \
     /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/gt \
-    /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/validation/ 
+    /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/${validation}/ 
 done

@@ -4,14 +4,14 @@
 # Basic Slurm directives
 # -----------------------------------------------------------------------------
 
-#SBATCH --job-name=f6_val   # Descriptive job name
-#SBATCH --account=bhattacharya-lab  
+#SBATCH --job-name=903_val   # Descriptive job name
+#SBATCH --account=bhattacharya-lab-share  
 #SBATCH --nodes=1                     # Request 1 node
 #SBATCH --ntasks-per-node=1          # Number of tasks per node
 #SBATCH --gres=gpu:1
-#SBATCH --partition=l40s_indrani         # Partition (queue) name on your cluster
-#SBATCH --time=1-23:00:00              # Walltime (HH:MM:SS) 
-#SBATCH --mem=32G                    # Memory request: 16 GB
+#SBATCH --partition=a100         # Partition (queue) name on your cluster
+#SBATCH --time=2-00:00:00              # Walltime (HH:MM:SS) 
+#SBATCH --mem=40G                    # Memory request: 16 GB
 
 # -----------------------------------------------------------------------------
 # Optional: Email notifications
@@ -40,17 +40,29 @@ echo "==============================="
 # -----------------------------------------------------------------------------
 # Syntax: nnUNetv2_train <dataset_name_or_id> <configuration> <fold> [--npz]
 
-fold_name="fold_6"
+# fold_name="fold_0"
 checkpoint_name="best"
+dataset_name="Dataset902_AutoPet"
 
-nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \
-                -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_no_mirror" \
-                -d 901 \
-                -tr autoPET3_Trainer \
-                -p nnUNetResEncUNetLPlansMultiTalent \
-                -c 3d_fullres \
-                -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
-                --save_probabilities --disable_tta
+for fold_name in fold_1; do
+    nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \
+                    -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_279" \
+                    -d 902 \
+                    -tr autoPET3_Trainer \
+                    -p nnUNetResEncUNetLPlansMultiTalent \
+                    -c 3d_fullres \
+                    -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
+                    --save_probabilities --disable_tta
+done
+
+# nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \
+#                 -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_no_mirror" \
+#                 -d 902 \
+#                 -tr autoPET3_Trainer \
+#                 -p nnUNetResEncUNetLPlansMultiTalent \
+#                 -c 3d_fullres \
+#                 -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset901_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
+#                 --save_probabilities --disable_tta
 
 
 

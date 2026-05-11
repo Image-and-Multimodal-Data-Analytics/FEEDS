@@ -410,6 +410,8 @@ class nnUNetPredictor(object):
                 # save the uncertainty map as a .nii file
                 print(f'saving uncertainty map for {os.path.basename(ofile) if ofile is not None else "image"}')
                 # save as
+                # print the average uncertainty value
+                print(f'average uncertainty: {uncertainty_map.mean().item()}')
                 
                 if ofile is not None:
                     # this needs to go into background processes
@@ -587,13 +589,39 @@ class nnUNetPredictor(object):
                 prediction /= len(self.list_of_parameters)
 
             prediction = inv_fn(prediction)
-            probs = torch.softmax(prediction, dim=0)
-            all_probability_maps.append(probs)
 
+            # If shape is (1, C, H, W, D) → squeeze batch dim first
+            if prediction.dim() == 5:
+                prediction = prediction.squeeze(0)  # → (C, H, W, D)
+                print(f"Prediction shape after squeeze: {prediction.shape}", flush=True)
+
+            # Now softmax over class dimension (dim=0)
+            probs = torch.softmax(prediction, dim=0)
+            if torch.isnan(probs).any() or torch.isinf(probs).any():
+                print(f"WARNING: skipping aug {i} - contains nan/inf")
+            else: 
+                all_probability_maps.append(probs)
+
+        # check if there are nan's in any of the probabiltiy matps
+        for i, probs in enumerate(all_probability_maps):
+            if torch.isnan(probs).any():
+                print(f"NaN found in probability map {i}")
+                print(f"This is augmentation {list(aug_fns)[i][0].__name__}")
+            if torch.isinf(probs).any():
+                print(f"Inf found in probability map {i}")
+                print(f"This is augmentation {list(aug_fns)[i][0].__name__}")
+            else: 
+                print(f"No NaN or Inf found in probability map {i}")
+                
         stacked = torch.stack(all_probability_maps, dim=0)
         mean_probs = stacked.mean(dim=0)
-        mean_logits = torch.log(mean_probs.clamp(min=1e-10))
-
+        mean_logits = torch.log(mean_probs.clamp(min=1e-8))
+        
+        # check the dims of mean_probs
+        print(f"mean_probs shape: {mean_probs.shape}", flush=True)
+        print(f"mean_probs sum over classes: {mean_probs.sum(dim=0).mean()}", flush=True)  # Should be ~1.0
+        print(f"mean_probs range: {mean_probs.min()}, {mean_probs.max()}", flush=True)
+        
         uncertainty_map = self.calculate_uncertainty(all_probability_maps)
 
         if self.verbose:
@@ -620,12 +648,39 @@ class nnUNetPredictor(object):
         """
         # Stack: (N_aug, C, *spatial_dims)
         stacked = torch.stack(probability_maps, dim=0)
+        print(f"stacked has nan: {torch.isnan(stacked).any()}", flush=True)
+        print(f"stacked has inf: {torch.isinf(stacked).any()}", flush=True)
+        print(f"stacked min/max: {stacked.min()}, {stacked.max()}", flush=True)
 
         if method == 'entropy':
-            # Predictive entropy: H[mean prediction]
-            mean_probs = stacked.mean(dim=0).clamp(min=1e-10, max=1.0)
+            mean_probs = stacked.mean(dim=0).float()  # ← force float32
+            mean_probs = mean_probs.clamp(min=1e-8, max=1.0 - 1e-8)
+            print(f"mean_probs min after clamp: {mean_probs.min()}", flush=True)
+            # If mean_probs had NaN, clamp does NOT remove it
+            # NaN survives clamp!
+            
             uncertainty = -(mean_probs * mean_probs.log()).sum(dim=0)
-
+            # mean_probs = stacked.mean(dim=0)
+            
+            # # Check how many zeros we have
+            # print(f"num exact zeros: {(mean_probs == 0).sum()}", flush=True)
+            # print(f"num near zeros (<1e-8): {(mean_probs < 1e-8).sum()}", flush=True)
+            
+            # mean_probs = mean_probs.clamp(min=1e-8, max=1.0 - 1e-8)
+            # mean_probs = mean_probs / mean_probs.sum(dim=0, keepdim=True)
+            
+            # log_probs = mean_probs.log()
+            
+            # # Check for any remaining -inf or nan
+            # print(f"any inf in log_probs: {torch.isinf(log_probs).any()}", flush=True)
+            # print(f"any nan in log_probs: {torch.isnan(log_probs).any()}", flush=True)
+            
+            # term = mean_probs * log_probs
+            
+            # # # 0 * -inf = NaN → replace with 0 (mathematically correct: 0*log(0) = 0)
+            # # term = torch.nan_to_num(term, nan=0.0, posinf=0.0, neginf=0.0)
+            
+            # uncertainty = -term.sum(dim=0)
         elif method == 'variance':
             # Mean per-class variance across augmentations
             uncertainty = stacked.var(dim=0).mean(dim=0)
@@ -774,7 +829,16 @@ class nnUNetPredictor(object):
                 prediction, uncertainty_map = self.predict_logits_from_preprocessed_data(data)
                 prediction = prediction.cpu()
                 uncertainty_map = uncertainty_map.cpu()
-
+                print(f"uncertainty min: {uncertainty_map.min()}", flush=True)
+                print(f"uncertainty max: {uncertainty_map.max()}", flush=True)
+                print(f"uncertainty mean: {uncertainty_map.mean()}", flush=True)
+                print(f"len of uncertainty unique vals: {len(uncertainty_map.unique())}", flush=True)
+                
+                
+                print(f"probability map min: {prediction.min()}", flush=True)
+                print(f"probability map max: {prediction.max()}", flush=True)
+                print(f"probability map mean: {prediction.mean()}", flush=True)
+                print(f"len of probability unique vals: {len(prediction.unique())}", flush=True)
                 # Save uncertainty as .nii.gz in original image space
                 if save_uncertainty and ofile is not None:
                     unc_dir = uncertainty_output_dir or os.path.dirname(ofile)
@@ -804,6 +868,7 @@ class nnUNetPredictor(object):
                 uncertainty_maps[map_key] = uncertainty_map
 
                 if ofile is not None:
+                    print(f"Mean uncertainty: {uncertainty_map.mean().item()}")
                     print('Sending TTA prediction to background worker for resampling and export')
                     r.append(
                         export_pool.starmap_async(
@@ -933,40 +998,6 @@ class nnUNetPredictor(object):
         ).squeeze(0).to(x.dtype)
 
         return blurred
-
-
-    def calculate_uncertainty(self, probability_maps: list, method: str = 'entropy') -> torch.Tensor:
-        """
-        Portable uncertainty calculation function.
-
-        Args:
-            probability_maps: List of probability tensors, each (C, *spatial_dims)
-            method: 'entropy', 'variance', or 'mutual_information'
-
-        Returns:
-            uncertainty_map: (*spatial_dims)
-        """
-        stacked = torch.stack(probability_maps, dim=0)
-
-        if method == 'entropy':
-            mean_probs = stacked.mean(dim=0).clamp(min=1e-10, max=1.0)
-            uncertainty = -(mean_probs * mean_probs.log()).sum(dim=0)
-
-        elif method == 'variance':
-            uncertainty = stacked.var(dim=0).mean(dim=0)
-
-        elif method == 'mutual_information':
-            mean_probs = stacked.mean(dim=0).clamp(min=1e-10, max=1.0)
-            entropy_of_mean = -(mean_probs * mean_probs.log()).sum(dim=0)
-            clamped = stacked.clamp(min=1e-10, max=1.0)
-            individual_entropies = -(clamped * clamped.log()).sum(dim=1)
-            mean_of_entropies = individual_entropies.mean(dim=0)
-            uncertainty = entropy_of_mean - mean_of_entropies
-
-        else:
-            raise ValueError(f"Unknown method: {method}. Use 'entropy', 'variance', or 'mutual_information'")
-
-        return uncertainty
 
     def _internal_get_sliding_window_slicers(self, image_size: Tuple[int, ...]):
         slicers = []
@@ -1290,6 +1321,8 @@ def predict_entry_point_modelfolder():
                                 allow_tqdm=not args.disable_progress_bar,
                                 verbose_preprocessing=args.verbose)
     predictor.initialize_from_trained_model_folder(args.m, args.f, args.chk)
+    print("continue_prediction set to:", args.continue_prediction)
+    
     predictor.predict_from_files(args.i, args.o, save_probabilities=args.save_probabilities,
                                  overwrite=not args.continue_prediction,
                                  num_processes_preprocessing=args.npp,
