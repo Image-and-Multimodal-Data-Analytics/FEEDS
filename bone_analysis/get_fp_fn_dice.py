@@ -45,11 +45,13 @@ def false_pos_pix(gt_array, pred_array):
 def false_neg_pix(gt_array, pred_array):
     gt_conn_comp = con_comp(gt_array)
     false_neg, false_missed_lesion_count = 0, 0
+
     for idx in range(1, gt_conn_comp.max() + 1):
         comp_mask = np.isin(gt_conn_comp, idx)
         if (comp_mask * pred_array).sum() == 0:
             false_neg += comp_mask.sum()
             false_missed_lesion_count += 1
+
     return false_neg, false_missed_lesion_count, gt_conn_comp.max()
 
 
@@ -63,14 +65,16 @@ def dice_score(mask1, mask2):
 def compute_metrics(nii_gt_path, nii_pred_path):
     gt_array, voxel_vol = nii2numpy(nii_gt_path)
     pred_array, _ = nii2numpy(nii_pred_path)
-    false_neg_vol, false_missed_lesion_count, _ = false_neg_pix(gt_array, pred_array)
-    false_pos_vol, false_detected_lesion_count, _ = false_pos_pix(gt_array, pred_array)
+    false_neg_vol, false_missed_lesion_count, num_true_lesions = false_neg_pix(gt_array, pred_array)
+    false_pos_vol, false_detected_lesion_count, num_pred_lesions = false_pos_pix(gt_array, pred_array)
     return (
         dice_score(gt_array, pred_array),
         false_pos_vol * voxel_vol,
         false_neg_vol * voxel_vol,
         false_missed_lesion_count,
         false_detected_lesion_count,
+        num_true_lesions, 
+        num_pred_lesions
     )
 
 
@@ -79,7 +83,7 @@ def process_file(args):
     try:
         return (os.path.basename(pred_file), *compute_metrics(gt_file, pred_file), None)
     except Exception as e:
-        return (os.path.basename(pred_file), None, None, None, None, None, str(e))
+        return (os.path.basename(pred_file), None, None, None, None, None, None, str(e))
 
 
 def main():
@@ -90,16 +94,16 @@ def main():
 
     with open(args.save_dir, 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
-        writer.writerow(['filename', 'dice_score', 'false_pos_vol', 'false_neg_vol', 'false_missed_lesions', 'false_detected_lesions'])
+        writer.writerow(['filename', 'dice_score', 'false_pos_vol', 'false_neg_vol', 'false_missed_lesions', 'false_detected_lesions', 'num_gt_lesions', 'num_pred_lesions'])
 
         with ProcessPoolExecutor(max_workers=args.num_workers) as executor:
             futures = {executor.submit(process_file, pair): pair for pair in pairs}
             for future in tqdm.tqdm(as_completed(futures), total=len(pairs)):
-                filename, dice_sc, fp_vol, fn_vol, missed, detected, error = future.result()
+                filename, dice_sc, fp_vol, fn_vol, missed, detected, num_true_lesions, num_pred_lesions, error = future.result()
                 if error:
                     print(f"Error processing {filename}: {error}")
                 else:
-                    writer.writerow([filename, dice_sc, fp_vol, fn_vol, missed, detected])
+                    writer.writerow([filename, dice_sc, fp_vol, fn_vol, missed, detected, num_true_lesions, num_pred_lesions])
                     csvfile.flush()  # ensure row is written to disk immediately
 
 if __name__ == '__main__':

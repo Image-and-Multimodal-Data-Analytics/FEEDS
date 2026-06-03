@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --array=7-9
+#SBATCH --array=10
 #SBATCH --job-name=infer_test_%j        # gives infer_Test_0, infer_Test_1, etc
 #SBATCH --output=logs/infer_test_%j.out
 #SBATCH --error=logs/infer_test_%j.err
@@ -25,7 +25,7 @@ echo "==============================="
 # -----------------------------------------------------------------------------
 # Parameters
 # -----------------------------------------------------------------------------
-FOLDS=(fold_0 fold_1 fold_2 fold_3 fold_4 fold_5 fold_6 fold_7 fold_8 fold_9)
+FOLDS=(fold_0 fold_1 fold_2 fold_3 fold_4 fold_5 fold_6 fold_7 fold_8 fold_9 fold_10 fold_11)
 fold_name=${FOLDS[$SLURM_ARRAY_TASK_ID]}   # picks fold based on job index
 
 checkpoint_name="best"

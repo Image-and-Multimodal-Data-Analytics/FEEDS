@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-task=24            
 #SBATCH --time=1:00:00
 #SBATCH --mem=64G
-#SBATCH --array=0-11   # adjust range to match your folds (0-11 = fold_0 to fold_11)
+#SBATCH --array=0-10   # adjust range to match your folds (0-11 = fold_0 to fold_11)
 
 nvidia-smi
 hostname
@@ -32,7 +32,7 @@ image_dir="${nnUNet_results}/val/images"
 label_dir="${nnUNet_results}/val/gt"
 
 version="validation_279"
-dataset_name="Dataset999_AutoPet"
+dataset_name="Dataset111_AutoPet"
 
 echo "Processing fold: $fold"
 
