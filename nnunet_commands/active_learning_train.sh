@@ -1,15 +1,12 @@
 #!/bin/bash
 
-#SBATCH --job-name=902_2
+#SBATCH --job-name=train_initals
 #SBATCH --output=autopet3_train_%j.out
 #SBATCH --error=autopet3_train_%j.err
-#SBATCH --account=bhattacharya-lab
-##SBATCH --nodelist=a05
-#SBATCH --partition=l40s_indrani
 #SBATCH --gres=gpu:1
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
-#SBATCH --time=3-12:00:00
+#SBATCH --time=2-00:00:00
 #SBATCH --mem=40G
 
 # Clean caches
@@ -35,7 +32,7 @@ echo "Using Python at: $(which python)"
 
 
 #This is for training with pretrained with uncertainty maps
-nnUNetv2_train 902 3d_fullres 2 -tr autoPET3_Trainer -p nnUNetResEncUNetLPlansMultiTalent -pretrained_weights  /dartfs/rc/lab/B/BhattacharyaI/Results/Bashirul/Research/autopet-3-submission/pretrained/Dataset619_nativemultistem/MultiTalent_trainer_multistems_4000ep__nnUNetResEncUNetL1x1x1_Plans_znorm_bs24__3d_fullres/fold_all/checkpoint_final.pth --npz 
+nnUNetv2_train 999 3d_fullres 0 -tr autoPET3_Trainer -p nnUNetResEncUNetLPlansMultiTalent -pretrained_weights  /dartfs/rc/lab/B/BhattacharyaI/Results/Bashirul/Research/autopet-3-submission/pretrained/Dataset619_nativemultistem/MultiTalent_trainer_multistems_4000ep__nnUNetResEncUNetL1x1x1_Plans_znorm_bs24__3d_fullres/fold_all/checkpoint_final.pth --npz 
 
 # nnUNetv2_train 903 3d_fullres 2 -tr autoPET3_Trainer -p nnUNetResEncUNetLPlansMultiTalent --npz --c
 
