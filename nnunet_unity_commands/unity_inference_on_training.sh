@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 
 
-#SBATCH --job-name=infer_train
+#SBATCH --job-name=inf_tr_f3
 #SBATCH --output=infer_test%j.out
 #SBATCH --error=infer_test%j.err
 #SBATCH --partition=gpu
@@ -14,7 +14,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=8
-#SBATCH --time=24:00:00
+#SBATCH --time=48:00:00
 #SBATCH --mem=40G
 
 # -----------------------------------------------------------------------------
@@ -49,9 +49,9 @@ checkpoint_name="best"
 datasetid=111
 dataset_name="Dataset${datasetid}_AutoPet"
 
-for fold_name in fold_8; do
-    nnUNetv2_predict --c -i "$nnUNet_results/train_30_pl" \
-                    -o "$nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_predictions" \
+for fold_name in fold_3; do
+    nnUNetv2_predict --c -i "$nnUNet_results/train_80_pl" \
+                    -o "$nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_predictions_80" \
                     -d ${datasetid} \
                     -tr autoPET3_Trainer \
                     -p nnUNetResEncUNetLPlansMultiTalent \

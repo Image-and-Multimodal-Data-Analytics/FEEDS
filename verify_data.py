@@ -5,15 +5,24 @@ import os
 import nibabel as nib
 
 # This is the directory I'm going to use for training
-Dataset = 901
+Dataset = 223
 
-DIR_TO_CHECK_DIR = f'//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset{Dataset}_AutoPet/nnUNetPlans_3d_fullres/'
-HARD_LABELS_DIR = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset888_AutoPet/nnUNetPlans_3d_fullres/'
+DIR_TO_CHECK_DIR = f'{os.getenv("nnUNet_preprocessed")}/Dataset{Dataset}_AutoPet/nnUNetPlans_3d_fullres/'
+HARD_LABELS_DIR    = '//{nnUNet_preprocessed}/Dataset999_AutoPet/nnUNetPlans_3d_fullres/'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'))
 
-PSEUDO_LABELS_DIR = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/train_tta_predicted/train_predictions_old/converted_segs'
-TEST_LABELS_DIR  = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/test/gt'
+PSEUDO_LABELS_DIR = '//{nnUNet_results}/Dataset111_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_8/train_predictions/converted_segs'.format(nnUNet_results=os.getenv('nnUNet_results'))
+TEST_LABELS_DIR  = f'{os.getenv("nnUNet_results")}/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/test/gt'
 # print cuda version too 
+SPLITS_DIR        = '//{nnUNet_preprocessed}/{dataset}/splits_final.json'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'), dataset='Dataset999_AutoPet')
 
+HARD_LABLLED_SPLITS = '//{nnUNet_preprocessed}/Dataset111_AutoPet/splits_final.json'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'))
+
+with open(SPLITS_DIR, 'r') as f:
+    splits_for_all = json.load(f)
+
+with open(HARD_LABLLED_SPLITS, 'r') as f:
+    splits = json.load(f)
+    
 
 
 
@@ -26,27 +35,9 @@ for d in [DIR_TO_CHECK_DIR, HARD_LABELS_DIR, PSEUDO_LABELS_DIR, HARD_LABELS_DIR,
     else:
         print(f"NOT EXIST: {d}")
 
-# just os.listdr the thing
-SPLITS_DIR = f'//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset{Dataset}_AutoPet/splits_final.json'
 
-with open(SPLITS_DIR, 'r') as f:
-    splits = json.load(f)
-print(len(splits))
-
-# for idx, fold in enumerate(splits):
-#     print(f"Fold {idx}:")
-#     print(f"\t Train: {len(splits[idx]['train'])} cases")
-#     print(f"\t Val: {len(splits[idx]['val'])} cases")
-sleep(5)
-
-# import from 888
-splits_from_888 = SPLITS_DIR.replace('Dataset901_AutoPet', 'Dataset888_AutoPet')
-with open(splits_from_888, 'r') as f:
-    splits_888 = json.load(f)
-
-    
-labelled   = set(splits[0]['train'])
-all_files  = set(splits_888[1]['train'])
+labelled   = set(splits[8]['train'])
+all_files  = set(splits_for_all[-1]['train'])
 unlabelled = all_files - labelled
 val_files  = set(splits[0]['val'])
 

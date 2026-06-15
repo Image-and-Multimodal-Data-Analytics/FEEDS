@@ -13,8 +13,8 @@
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=8
 #SBATCH --time=00:10:00
-#SBATCH --mem=40G
-                 # Memory request: 16 GB
+#SBATCH --mem=20G
+# Memory request: 16 GB
 # -----------------------------------------------------------------------------
 # Print GPU and environment info for debugging
 # -----------------------------------------------------------------------------
@@ -36,11 +36,12 @@ echo "==============================="
 
 # for fold in fold_10_ens_0 fold_10_ens_1 fold_10_ens_2 fold_10_ens_3 fold_10_ens_4; do
 
-input_dataset="Dataset999_AutoPet"
+input_dataset="Dataset223_AutoPet"
 validation="validation_279"
 
+echo "Starting evaluation for dataset: $input_dataset,  On: $validation"
 
-for fold in fold_10; do
+for fold in fold_11; do
   echo "Evaluating fold: $fold"
   nnUNetv2_evaluate_folder \
     -djfile $nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \

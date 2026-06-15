@@ -15,6 +15,7 @@
 #SBATCH --cpus-per-task=8
 #SBATCH --time=00:20:00
 #SBATCH --mem=40G
+#SBATCH --qos=short
 
 # -----------------------------------------------------------------------------
 # Print GPU and environment info for debugging
@@ -41,7 +42,7 @@ input_dataset="Dataset999_AutoPet"
 validation="test_predictions"
 
 
-for fold in fold_0 fold_3; do
+for fold in fold_7; do
   echo "Evaluating fold: $fold"
   nnUNetv2_evaluate_folder \
     -djfile $nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \

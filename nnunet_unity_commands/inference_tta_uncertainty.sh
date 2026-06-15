@@ -17,17 +17,17 @@
 # =============================================================================
 # Basic Slurm directives
 # =============================================================================
-#SBATCH --job-name=predict_bad_tta     # Descriptive job name
-#SBATCH --account=free
-#SBATCH --nodes=1                       # Request 1 node
-#SBATCH --ntasks-per-node=1            # Number of tasks per node
+#SBATCH --job-name=tta
+#SBATCH --output=tta%j.out
+#SBATCH --error=tta%j.err
+#SBATCH --partition=gpu
 #SBATCH --gres=gpu:1
-#SBATCH --partition=gpuq        # Partition (queue) name on your cluster
-#SBATCH --time=1-5:20:00               # Walltime (days-HH:MM:SS) 
-# # SBATCH --nodelist=adanova01
-#SBATCH --mem=60G                      # Memory request: 32 GB
-#SBATCH --output=predict_bad_tta_%j.out  # Standard output log file
-#SBATCH --error=predict_bad_tta_%j.err   # Standard error log file
+#SBATCH --constraint=vram40|vram80
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=2
+#SBATCH --cpus-per-task=8
+#SBATCH --time=24:00:00
+#SBATCH --mem=40G
 
 
 # =============================================================================
@@ -60,17 +60,17 @@ IMAGE_NAME=".nii.gz"
 
 #!/bin/bash
 
-fold_name="fold_5"
+fold_name="fold_8"
 checkpoint_name="best"
 MODEL_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres"
-INPUT_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/train_link/"
-OUTPUT_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta_predicted" 
+INPUT_DIR="$nnUNet_results/train_30_pl"
+OUTPUT_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta/" 
 
 python ../nnunetv2/inference/predict_TTA.py \
     --continue_prediction \
     -i $INPUT_DIR \
     -o $OUTPUT_DIR \
-    -d 999 \
+    -d 111 \
     -tr autoPET3_Trainer \
     -p nnUNetResEncUNetLPlansMultiTalent \
     -c 3d_fullres \

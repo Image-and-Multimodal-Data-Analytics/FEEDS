@@ -2,72 +2,11 @@
 import os
 import numpy as np
 import json
-BASEDIR = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset999_AutoPet/nnUNetPlans_3d_fullres/'
-
-RESULTS_DIR = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/'
-
-# Now all paths are SHORT
-os.chdir(RESULTS_DIR)
-ENS_DIR = 'fold_10_ensemble_results'
-TTA_DIR = 'fold_0/train_tta_predicted'
-
-# ENS IS 1
-DIRS = [ENS_DIR, TTA_DIR]
-UNCERTAINTY_MAPS_DIRS = [os.path.join(DIRS[0], 'train_uncertainty_maps'), os.path.join(DIRS[1], 'train_uncertainty_maps')]
-# UNCERTAINTY_MAPS_DIR_RAW = './train_uncertainty_maps_raw'
-PREDICTED_LABELS_DIRS = [os.path.join(DIRS[0], 'train_predictions'), os.path.join(DIRS[1], 'train_predictions')]
-SUMMARY_JSON_DIRS     = [os.path.join(DIRS[0], 'train_predictions/summary.json'), os.path.join(DIRS[1], 'train_predictions/summary.json')]
-TRUE_LABELS_DIR      = '/lab/B/BhattacharyaI/Public_Datasets/Autopet_III_nnunet_raw/Dataset888_AutoPet/labelsTr'
-SAVE_DIR             = '/lab/B/BhattacharyaI/Results/Biratal/Uncertainty_Examples/'
-SAVED_DF_DIRS = [['binned_uncertainty_stats_2026_04_23_105932.csv', 'summary_uncertainty_stats_2026_04_23_105932.csv'], # ENS DATA 
-                          ['binned_uncertainty_stats_2026_04_21_101854.csv', 'summary_uncertainty_stats_2026_04_21_101854.csv']] # TTA DATA
-
-combined_dfs = []
-
-# Verify
-print("UNCERTAINTY_MAPS_DIRS exist:")
-for d in UNCERTAINTY_MAPS_DIRS:
-    print(f"  {d}: { os.path.exists(d) }")
-
-print("PREDICTED_LABELS_DIRS exist:")
-for d in PREDICTED_LABELS_DIRS:
-    print(f"  {d}: {os.path.exists(d)}")
-
-print("SUMMARY_JSON_DIRS exist:")
-for d in SUMMARY_JSON_DIRS:
-    print(f"  {d}: {os.path.exists(d) }")
-
-print("TRUE_LABELS_DIR exists:     ", os.path.exists(TRUE_LABELS_DIR))
-print("SAVE_DIR exists:            ", os.path.exists(SAVE_DIR))
-
-
-# pickle_file_path = os.path.join(UNCERTAINTY_MAPS_DIR, 'global_uncertainty_stats.pkl')
-# global_stats = np.load(pickle_file_path, allow_pickle=True)
-
-# %%
-import nibabel as nib
-import pickle
-count = 0 
-for labels in os.listdir(PREDICTED_LABELS_DIRS[0])[:10]:
-    if labels.endswith('.nii.gz'):
-        label = nib.load(os.path.join(PREDICTED_LABELS_DIRS[0], labels))
-        pkl_files = pickle.load(open(os.path.join(PREDICTED_LABELS_DIRS[0], labels.replace('.nii.gz', '.pkl')), 'rb'))
-        count += 1
-print(f"Total cases processed: {count}")
-
-# %%
-import os
-import sys
-import numpy as np
 import nibabel as nib
 import pickle
 from pathlib import Path
-from tqdm import tqdm
 from scipy.ndimage import zoom
 
-REPO_ROOT = '//dartfs/rc/lab/B/BhattacharyaI/Results/Biratal/nnUNet'
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
 
 def resample_data_or_seg_to_shape(
     data,
@@ -254,46 +193,24 @@ from tqdm import tqdm
 # ─────────────────────────────────────────────────────────────
 # DIRECTORIES
 # ─────────────────────────────────────────────────────────────
-BASEDIR     = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_processed/Dataset999_AutoPet/nnUNetPlans_3d_fullres/'
-RESULTS_DIR = '//dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/'
 
-ENS_DIR = 'fold_10_ensemble_results'
-TTA_DIR = 'fold_0/train_tta_predicted'
+import os
+import argparse
+argparse = argparse.ArgumentParser(description='Convert NIfTI segmentations to NumPy arrays with resampling.')
+argparse.add_argument('--nifti_labels_dir', type=str, required=True, help='Directory containing NIfTI segmentation files (.nii.gz)')
+argparse.add_argument('--pkl_dir', type=str, required=True, help='Directory containing .pkl files with case properties')
+argparse.add_argument('--output_dir', type=str, required=True, help='Directory to save the converted .npy segmentation files')
+args = argparse.parse_args()
 
-PREDICTED_LABELS_DIRS = [
-    os.path.join(RESULTS_DIR, ENS_DIR, 'train_predictions'),
-    os.path.join(RESULTS_DIR, TTA_DIR, 'train_predictions')
-]
 
-TRUE_LABELS_DIR = '/lab/B/BhattacharyaI/Public_Datasets/Autopet_III_nnunet_raw/Dataset888_AutoPet/labelsTr'
 
-# ── Derived from your snippet ─────────────────────────────────
-# curr_file_path    = predicted label .nii.gz  (from TTA dir [1])
-# curr_file_pkl     = corresponding .pkl       (from BASEDIR)
-# curr_file_output  = output converted_segs    (inside ENS dir [0])
-
-tta_cases = sorted([f for f in os.listdir(PREDICTED_LABELS_DIRS[1]) if f.endswith('.nii.gz')])
-if not tta_cases:
-    raise FileNotFoundError(f'No .nii.gz files found in {PREDICTED_LABELS_DIRS[1]}')
-
-curr_case_name = tta_cases[0]
-curr_file_path = os.path.join(PREDICTED_LABELS_DIRS[1], curr_case_name)
-curr_file_pkl = os.path.join(BASEDIR, curr_case_name.replace('.nii.gz', '.pkl'))
-curr_file_output_dir = os.path.join(PREDICTED_LABELS_DIRS[0], 'converted_segs')
-
-os.chdir(BASEDIR)
-
-print(f"Example predicted file : {curr_file_path}")
-print(f"Example pkl file       : {curr_file_pkl}")
-print(f"Output dir             : {curr_file_output_dir}")
-print(f"PKL exists             : {os.path.exists(curr_file_pkl)}")
 
 
 # # ── Full dataset ──────────────────────────────────────────────
 batch_convert(
-    nifti_labels_dir = os.path.join(PREDICTED_LABELS_DIRS[1]),  # TTA dir has the .nii.gz preds
-    pkl_dir          = BASEDIR,                                    # BASEDIR has the .pkl files
-    output_dir       = os.path.join(PREDICTED_LABELS_DIRS[1], 'converted_segs'),  # Save converted segs inside ENS dir
+    nifti_labels_dir = args.nifti_labels_dir,
+    pkl_dir          = args.pkl_dir,
+    output_dir       = args.output_dir,
     verbose          = False
 )
 

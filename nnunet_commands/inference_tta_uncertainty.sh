@@ -60,22 +60,22 @@ IMAGE_NAME=".nii.gz"
 
 #!/bin/bash
 
-fold_name="fold_0_10"
+fold_name="fold_8"
 checkpoint_name="best"
-MODEL_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres"
-INPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/train_link/"
-OUTPUT_DIR="/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta_predicted_bad_subset/" 
+MODEL_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres"
+INPUT_DIR="$nnUNet_results/train_30_pl"
+OUTPUT_DIR="$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/train_tta/" 
 
 python ../nnunetv2/inference/predict_TTA.py \
     --continue_prediction \
     -i $INPUT_DIR \
     -o $OUTPUT_DIR \
-    -d 999 \
+    -d 111 \
     -tr autoPET3_Trainer \
     -p nnUNetResEncUNetLPlansMultiTalent \
     -c 3d_fullres \
     -f 0 \
-    -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth" \
+    -chk "$nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth" \
     --save_probabilities \
     --disable_tta 
 # If you want to train multiple folds in one script, you could do something like:

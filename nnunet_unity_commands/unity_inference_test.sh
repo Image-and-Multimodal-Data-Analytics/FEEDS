@@ -46,10 +46,10 @@ echo "==============================="
 
 # fold_name="fold_0"
 checkpoint_name="best"
-datasetid=111
+datasetid=999
 dataset_name="Dataset${datasetid}_AutoPet"
 
-for fold_name in fold_0 fold_1 fold_2 fold_3; do
+for fold_name in fold_7; do
     nnUNetv2_predict --c -i "$nnUNet_results/test/images" \
                     -o "$nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/test_predictions" \
                     -d ${datasetid} \
