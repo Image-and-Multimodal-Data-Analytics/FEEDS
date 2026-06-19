@@ -1,6 +1,6 @@
 #!/bin/bash
 # mets_analysis.sh
-#SBATCH -J test_223_get_fp_fn
+#SBATCH -J test_999_get_fp_fn
 #SBATCH --partition=cpu
 #SBATCH -o logs/lesion_metric_calc_%j.out
 #SBATCH -e logs/lesion_metric_calc_%j.err
@@ -9,7 +9,7 @@
 #SBATCH --cpus-per-task=24            
 #SBATCH --time=0:30:00
 #SBATCH --mem=64G
-#SBATCH --array=[11]   # adjust range to match your folds (0-11 = fold_0 to fold_11)
+#SBATCH --array=[1]   # adjust range to match your folds (0-11 = fold_0 to fold_11)
 
 nvidia-smi
 hostname
@@ -25,17 +25,17 @@ folds=("fold_0" "fold_1" "fold_2" "fold_3" "fold_4" "fold_5" "fold_6" "fold_7" "
 # # Pick the fold corresponding to the array task ID
 fold=${folds[$SLURM_ARRAY_TASK_ID]}
 
-# image_dir="${nnUNet_results}/test/images"
-# label_dir="${nnUNet_results}/test/gt"
-# version="test_predictions"
+image_dir="${nnUNet_results}/test/images"
+label_dir="${nnUNet_results}/test/gt"
+version="test_predictions"
 
 
-image_dir="${nnUNet_results}/val/images"
-label_dir="${nnUNet_results}/val/gt"
-version="validation_279"
+# image_dir="${nnUNet_results}/val/images"
+# label_dir="${nnUNet_results}/val/gt"
+# version="validation_279"
 
-dataset_name="Dataset223_AutoPet"
-
+dataset_name="Dataset111_AutoPet"
+sq
 echo "Processing fold: $fold"
 
 pred_dir="${nnUNet_results}/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/${version}"

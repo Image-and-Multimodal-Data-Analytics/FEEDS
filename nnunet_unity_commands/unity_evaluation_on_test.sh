@@ -42,7 +42,7 @@ input_dataset="Dataset999_AutoPet"
 validation="test_predictions"
 
 
-for fold in fold_7; do
+for fold in fold_8; do
   echo "Evaluating fold: $fold"
   nnUNetv2_evaluate_folder \
     -djfile $nnUNet_results/$input_dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \

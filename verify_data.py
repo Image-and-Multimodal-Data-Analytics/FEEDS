@@ -5,12 +5,13 @@ import os
 import nibabel as nib
 
 # This is the directory I'm going to use for training
-Dataset = 223
+Dataset = 280
+PSEUDO_SPLIT_NUM = 5
 
 DIR_TO_CHECK_DIR = f'{os.getenv("nnUNet_preprocessed")}/Dataset{Dataset}_AutoPet/nnUNetPlans_3d_fullres/'
 HARD_LABELS_DIR    = '//{nnUNet_preprocessed}/Dataset999_AutoPet/nnUNetPlans_3d_fullres/'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'))
 
-PSEUDO_LABELS_DIR = '//{nnUNet_results}/Dataset111_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_8/train_predictions/converted_segs'.format(nnUNet_results=os.getenv('nnUNet_results'))
+PSEUDO_LABELS_DIR = '//{nnUNet_results}/Dataset111_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_{PSEUDO_SPLIT_NUM}/train_predictions_60/converted_segs'.format(PSEUDO_SPLIT_NUM=PSEUDO_SPLIT_NUM, nnUNet_results=os.getenv('nnUNet_results'))
 TEST_LABELS_DIR  = f'{os.getenv("nnUNet_results")}/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/test/gt'
 # print cuda version too 
 SPLITS_DIR        = '//{nnUNet_preprocessed}/{dataset}/splits_final.json'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'), dataset='Dataset999_AutoPet')
@@ -25,6 +26,11 @@ with open(HARD_LABLLED_SPLITS, 'r') as f:
     
 
 
+labelled   = set(splits[PSEUDO_SPLIT_NUM]['train'])
+all_files  = set(splits_for_all[-1]['train'])
+unlabelled = all_files - labelled
+val_files  = set(splits[0]['val'])
+
 
 for d in [DIR_TO_CHECK_DIR, HARD_LABELS_DIR, PSEUDO_LABELS_DIR, HARD_LABELS_DIR, TEST_LABELS_DIR, HARD_LABELS_DIR]:
     print(f"Checking directory: {d}")
@@ -36,10 +42,7 @@ for d in [DIR_TO_CHECK_DIR, HARD_LABELS_DIR, PSEUDO_LABELS_DIR, HARD_LABELS_DIR,
         print(f"NOT EXIST: {d}")
 
 
-labelled   = set(splits[8]['train'])
-all_files  = set(splits_for_all[-1]['train'])
-unlabelled = all_files - labelled
-val_files  = set(splits[0]['val'])
+
 
 print(f"Total labelled cases: {len(labelled)}")
 print(f"Total unlabelled cases: {len(unlabelled)}")

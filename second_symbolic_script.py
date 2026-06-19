@@ -9,14 +9,14 @@ print(os.getcwd())
 
 HARD_LABLLED_SPLITS = '//{nnUNet_preprocessed}/Dataset111_AutoPet/splits_final.json'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'))
 SPLITS_DIR        = '//{nnUNet_preprocessed}/{dataset}/splits_final.json'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'), dataset='Dataset999_AutoPet')
-DATASET_ID        = 280   # <-- CHANGE AS NEEDED 
-PSEUDO_FOLD = 3
+DATASET_ID        = 260   # <-- CHANGE AS NEEDED 
+PSEUDO_FOLD = 5
 
 
 SPLITS_DIR = SPLITS_DIR.format(dataset=f'Dataset{DATASET_ID:03d}_AutoPet')
 # Source directories
 HARD_LABELS_DIR    = '//{nnUNet_preprocessed}/Dataset999_AutoPet/nnUNetPlans_3d_fullres/'.format(nnUNet_preprocessed=os.getenv('nnUNet_preprocessed'))
-PSEUDO_LABELS_DIR = '//{nnUNet_results}/Dataset111_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_{fold}/train_predictions_80/converted_segs'.format(nnUNet_results=os.getenv('nnUNet_results'), fold=PSEUDO_FOLD)
+PSEUDO_LABELS_DIR = '//{nnUNet_results}/Dataset111_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_{fold}/train_predictions_60/converted_segs'.format(nnUNet_results=os.getenv('nnUNet_results'), fold=PSEUDO_FOLD)
 
 # Destination
 

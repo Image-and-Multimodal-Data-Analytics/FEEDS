@@ -5,7 +5,7 @@
 # -----------------------------------------------------------------------------
 
 
-#SBATCH --job-name=infer_test_0and3
+#SBATCH --job-name=infer_test
 #SBATCH --output=infer_test%j.out
 #SBATCH --error=infer_test%j.err
 #SBATCH --partition=gpu
@@ -14,7 +14,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=2
 #SBATCH --cpus-per-task=8
-#SBATCH --time=24:00:00
+#SBATCH --time=1:00:00
 #SBATCH --mem=40G
 
 # -----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ checkpoint_name="best"
 datasetid=999
 dataset_name="Dataset${datasetid}_AutoPet"
 
-for fold_name in fold_7; do
+for fold_name in fold_8; do
     nnUNetv2_predict --c -i "$nnUNet_results/test/images" \
                     -o "$nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/test_predictions" \
                     -d ${datasetid} \
