@@ -29,6 +29,7 @@ var/
 *.out
 **.nii.gz
 
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
@@ -123,3 +124,4 @@ ENV/
 *.csv
 *.xml
 *.png
+nnunetv2/preprocessing/organ_extraction/autopet3_organ_labels/*
