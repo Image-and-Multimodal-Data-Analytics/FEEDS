@@ -4,13 +4,13 @@
 # Basic Slurm directives
 # -----------------------------------------------------------------------------
 
-#SBATCH --job-name=903_val   # Descriptive job name
-#SBATCH --account=bhattacharya-lab-share  
+#SBATCH --job-name=902_val   # Descriptive job name
+#SBATCH --account=free
 #SBATCH --nodes=1                     # Request 1 node
 #SBATCH --ntasks-per-node=1          # Number of tasks per node
 #SBATCH --gres=gpu:1
-#SBATCH --partition=a100         # Partition (queue) name on your cluster
-#SBATCH --time=2-00:00:00              # Walltime (HH:MM:SS) 
+#SBATCH --partition=gpuq         # Partition (queue) name on your cluster
+#SBATCH --time=1-12:00:00              # Walltime (HH:MM:SS) 
 #SBATCH --mem=40G                    # Memory request: 16 GB
 
 # -----------------------------------------------------------------------------
@@ -44,7 +44,7 @@ echo "==============================="
 checkpoint_name="best"
 dataset_name="Dataset902_AutoPet"
 
-for fold_name in fold_1; do
+for fold_name in fold_0; do
     nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \
                     -o "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/validation_279" \
                     -d 902 \
@@ -52,7 +52,7 @@ for fold_name in fold_1; do
                     -p nnUNetResEncUNetLPlansMultiTalent \
                     -c 3d_fullres \
                     -chk "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/${dataset_name}/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold_name}/checkpoint_${checkpoint_name}.pth"\
-                    --save_probabilities --disable_tta
+                    --save_probabilities 
 done
 
 # nnUNetv2_predict --c -i "/dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_0_10/val/images" \

@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=get_ensemble
 #SBATCH --account=bhattacharya-lab
-#SBATCH --partition=l40s_indrani
+#SBATCH --partition=free
 #SBATCH --gres=gpu:1
 #SBATCH --output=create_ensemble_results_%j.out
 #SBATCH --error=create_ensemble_results_%j.err
@@ -22,5 +22,5 @@ fi
 
 
 # 2) Preprocess a new dataset 
-python create_ensemble_results_global.py
+python collate_uncertainty_maps.py
 
