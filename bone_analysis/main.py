@@ -73,7 +73,7 @@ def _mets_worker(lesion_file, dirs, save_dir, skip_existing):
         )
         return f"ok:{image_id}"
     except Exception as e:
-        print(f"ERROR in mets worker for {image_id}: {e}", flush=True)
+        print(f"ERROR in mets worker for {image_id}: {e}")
         return f"error:{image_id}"
 
 

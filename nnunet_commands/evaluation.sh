@@ -9,7 +9,7 @@
 #SBATCH --account=free
 #SBATCH --ntasks-per-node=1          # Number of tasks per node
 #SBATCH --partition=gpuq       # Partition (queue) name on your cluster
-#SBATCH --time=00:20:00              # Walltime (HH:MM:SS) 
+#SBATCH --time=00:30:00              # Walltime (HH:MM:SS) 
 #SBATCH --mem=16G                    # Memory request: 16 GB
 # -----------------------------------------------------------------------------
 # Print GPU and environment info for debugging
@@ -30,10 +30,23 @@ echo "==============================="
 # module load anaconda/2023
 # source activate nnunet_env
 
-fold="fold_1" # --- IGNORE ---
 
-nnUNetv2_evaluate_folder \
-  -djfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \
-  -pfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/plans.json \
-  /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_10_ens_0_org/test/gt \
-  /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/test_predictions 
+for dataset in Dataset902_AutoPet Dataset903_AutoPet Dataset904_AutoPet; do
+  echo "Evaluating on dataset: $dataset"
+  for fold in fold_0 fold_1 fold_2; do
+    echo "Evaluating fold: $fold"
+    nnUNetv2_evaluate_folder \
+      -djfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \
+      -pfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/plans.json \
+      /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/test/gt \
+      /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/test_predictions 
+  done
+done
+
+# for fold in fold_0 fold_1 fold_2; do
+#   nnUNetv2_evaluate_folder \
+#     -djfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/dataset.json \
+#     -pfile /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/plans.json \
+#     /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/Dataset999_AutoPet/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/fold_10_ens_0_org/test/gt \
+#     /dartfs/rc/lab/B/BhattacharyaI/Results/nnUNet_data/nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/${fold}/test_predictions 
+# done

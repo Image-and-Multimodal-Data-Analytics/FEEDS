@@ -158,6 +158,7 @@ def process_bone_mets(lesion_file: str, dirs: dict):
     obj = BoneMetastasis(image=image_file, lesion=lesion_file,
                          bone=bone_file,   pred=pred_file)
     obj.lookup_table()
+    obj.add_voxel_volume()
     obj.add_priority("ground")
     obj.add_priority("pred")
     obj.add_high_risk()
