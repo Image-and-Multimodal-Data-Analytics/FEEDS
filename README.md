@@ -66,22 +66,7 @@ Biratal R. Wagle¹, Bashirul A. Biswas¹, Marc A. Seltzer², Matthew E. Maeder²
 ---
 ---
 
-## Citation
 
-If you use FEEDS in your research, please cite:
-
-> Wagle, B. R., Biswas, B. A., Seltzer, M. A., Maeder, M. E., Yu, J. B., & Bhattacharya, I.
-> *FEEDS: Foundation model-Enabled Efficient Data Sampling — A label-efficient training strategy for pan-cancer, multi-tracer PET/CT datasets.*
-
-```bibtex
-@article{wagle_feeds,
-  title   = {FEEDS: Foundation model-Enabled Efficient Data Sampling --
-             A label-efficient training strategy for pan-cancer, multi-tracer PET/CT datasets},
-  author  = {Wagle, Biratal R. and Biswas, Bashirul A. and Seltzer, Marc A. and
-             Maeder, Matthew E. and Yu, James B. and Bhattacharya, Indrani},
-  note    = {Bhattacharya Lab, Department of Biomedical Data Science,
-             Geisel School of Medicine, Dartmouth College}
-}
 ```
 
 ## Acknowledgments
