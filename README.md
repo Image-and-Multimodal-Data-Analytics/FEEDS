@@ -3,7 +3,7 @@
 **A label- and compute-efficient training strategy for pan-cancer, multi-tracer whole-body PET/CT lesion segmentation.**
 
 <p align="center">
-  <img src="assets/feeds_pipeline.png" alt="FEEDS pipeline overview" width="100%">
+  <img src="feeds_pipeline.png" alt="FEEDS pipeline overview" width="100%">
 </p>
 
 ---
