@@ -67,7 +67,6 @@ Biratal R. Wagle¹, Bashirul A. Biswas¹, Marc A. Seltzer², Matthew E. Maeder²
 ---
 
 
-```
 
 ## Acknowledgments
 
