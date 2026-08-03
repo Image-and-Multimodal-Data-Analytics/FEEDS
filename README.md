@@ -25,9 +25,9 @@ FEEDS achieves label- and compute-efficient segmentation in three steps (see fig
 
 1. **Foundation model feature extraction.** For each 3D PET volume, a z-axis maximum-intensity projection (MIP) is computed, z-score normalized, and passed through a pretrained **DINOv2** encoder to obtain an image-level token representation `f ∈ ℝ⁷⁶⁸`.
 
-2. **Diversity-based selection of unlabeled cases.** Selection is performed **independently per tracer type** (FDG, PSMA), since the two form distinct clusters in feature space. For each unlabeled case, its minimum cosine distance to the tracer-matched labeled pool is computed; cases with the largest distance are the least represented. Within each tracer group, the farthest *X%* of cases are selected for annotation, preserving the FDG:PSMA ratio and prioritizing underrepresented scan patterns (rare cancer types, unusual uptake distributions).
+2. **FEEDS Sampling.** Selection is performed **independently per tracer type** (FDG, PSMA), since the two form distinct clusters in feature space. For each unlabeled case, its minimum cosine distance to the tracer-matched labeled pool is computed. Within each tracer group, the farthest *X%* of cases are selected for annotation, preserving the FDG:PSMA ratio and prioritizing underrepresented scan patterns (rare cancer types, unusual uptake distributions).
 
-3. **Segmentation model training.** The FEEDS-selected diverse cases are annotated, added to the fixed labeled pool, and used to train an **nnU-Net** model for whole-body lesion segmentation. nnU-Net auto-configures preprocessing, patch size, topology, and post-processing from dataset fingerprinting, providing a robust and reproducible benchmark. Models are trained for 280 epochs following the preprocessing of Rokuss et al.
+3. **Segmentation model training.** The FEEDS-selected diverse cases are annotated, added to the fixed labeled pool, and used to train an **nnU-Net** model for whole-body lesion segmentation.
 
 ---
 
@@ -43,21 +43,8 @@ Accuracy and generalizability were tested on three held-out sets:
 | **DeepPSMA** | 200 | FDG, PSMA | Prostate cancer |
 | **DHMC** (internal, Dartmouth-Hitchcock Medical Center) | 23 | PSMA | Prostate, no-cancer |
 
-> **Note on data access.** AutoPET-III and DeepPSMA are publicly available from their respective sources. The DHMC dataset is an internal, de-identified retrospective cohort (IRB-approved, consent waived) and is not publicly released.
+> **Note on data access.** AutoPET-III and DeepPSMA are publicly available from their respective sources. The DHMC dataset is an internal, de-identified dataset and is not publicly released.
 
----
-
-## Evaluation
-
-Clinical utility is assessed at three levels, plus disease- and tracer-stratified analyses:
-
-- **Voxel-level:** Dice Similarity Coefficient (↑), False Positive Volume (mL, ↓), False Negative Volume (mL, ↓).
-- **Lesion-level:** lesion counting, sensitivity, and positive predictive value for detection, treatment planning, and disease tracking.
-- **Anatomic region-level:** performance in high-risk regions (e.g., liver, lung, high-risk bone) relevant to treatment eligibility.
-
-**Highlights.** At a 30% labeling budget, FEEDS improves lesion sensitivity, PPV, and false-negative volume across disease types, tracers, and anatomic regions while maintaining Dice and false-positive volume. It achieves the best FPVol on DeepPSMA and the best FNVol on both external cohorts, and generalizes better than 100%-labeled AutoPET training on the DHMC cohort (where protocol/scanner differences cause the fully-labeled model to over-segment).
-
----
 
 ## Baselines Compared
 
@@ -68,15 +55,15 @@ Clinical utility is assessed at three levels, plus disease- and tracer-stratifie
 
 ---
 
-## Repository Structure
+## Authors & Affiliations
 
-```
-FEEDS/
-├── README.md
-└── assets/
-    └── feeds_pipeline.png     # Pipeline overview figure
-```
+Biratal R. Wagle¹, Bashirul A. Biswas¹, Marc A. Seltzer², Matthew E. Maeder², James B. Yu³, Indrani Bhattacharya¹ (corresponding author: `Indrani.Bhattacharya@dartmouth.edu`)
 
+1. Department of Biomedical Data Science, Geisel School of Medicine, Dartmouth College
+2. Department of Radiology, Dartmouth-Hitchcock Medical Center
+3. Department of Radiation Oncology, Dartmouth-Hitchcock Medical Center
+
+---
 ---
 
 ## Citation
@@ -96,18 +83,6 @@ If you use FEEDS in your research, please cite:
              Geisel School of Medicine, Dartmouth College}
 }
 ```
-
----
-
-## Authors & Affiliations
-
-Biratal R. Wagle¹, Bashirul A. Biswas¹, Marc A. Seltzer², Matthew E. Maeder², James B. Yu³, Indrani Bhattacharya¹ (corresponding author: `Indrani.Bhattacharya@dartmouth.edu`)
-
-1. Department of Biomedical Data Science, Geisel School of Medicine, Dartmouth College
-2. Department of Radiology, Dartmouth-Hitchcock Medical Center
-3. Department of Radiation Oncology, Dartmouth-Hitchcock Medical Center
-
----
 
 ## Acknowledgments
 
