@@ -1,0 +1,20 @@
+Dataset,Metric,Diagnosis,FEEDS,Random,Δ,Wilc p (raw),Wilc p (FDR),NI vs 100%
+AutoPET,Dice,Lung Cancer,0.726,0.735 ± 0.035,-0.009,0.334,0.447,✗
+AutoPET,Dice,Lymphoma,0.686,0.656 ± 0.081,+0.030,0.043,0.130,✗
+AutoPET,Dice,Melanoma,0.656,0.653 ± 0.075,+0.003,0.600,0.600,✗
+AutoPET,Dice,Prostate Cancer,0.544,0.552 ± 0.058,-0.007,0.335,0.447,✗
+AutoPET,FP Vol,Lung Cancer,1.96,3.30 ± 3.59,-1.34,0.003,0.004,✓
+AutoPET,FP Vol,Lymphoma,2.15,4.33 ± 2.18,-2.18,3.80e-04,6.65e-04,✓
+AutoPET,FP Vol,Melanoma,4.07,5.09 ± 2.87,-1.02,0.006,0.008,✓
+AutoPET,FP Vol,Negative,5.60,8.11 ± 4.92,-2.50,6.36e-15,2.23e-14,✓
+AutoPET,FP Vol,Prostate Cancer,10.50,10.17 ± 2.95,+0.32,2.31e-07,5.39e-07,✓
+AutoPET,FN Vol,Lung Cancer,14.14,15.01 ± 3.64,-0.88,0.012,0.075,✗
+AutoPET,FN Vol,Lymphoma,6.79,8.41 ± 4.52,-1.62,0.958,0.958,✗
+AutoPET,FN Vol,Melanoma,3.13,3.04 ± 0.98,+0.10,0.149,0.242,✓
+AutoPET,FN Vol,Prostate Cancer,13.82,15.13 ± 2.94,-1.31,0.115,0.242,✗
+DeepPSMA,Dice,Pooled,0.645,0.653 ± 0.060,-0.009,0.372,0.447,✓
+DeepPSMA,FP Vol,Pooled,3.39,5.56 ± 4.09,-2.17,9.64e-19,6.75e-18,✓
+DeepPSMA,FN Vol,Pooled,14.98,17.07 ± 5.57,-2.09,0.161,0.242,✗
+DH,Dice,Pooled,0.534,0.491 ± 0.054,+0.043,0.008,0.050,✓
+DH,FP Vol,Pooled,19.08,23.28 ± 11.78,-4.20,0.028,0.028,✓
+DH,FN Vol,Pooled,2.72,2.89 ± 0.36,-0.17,0.790,0.948,✓

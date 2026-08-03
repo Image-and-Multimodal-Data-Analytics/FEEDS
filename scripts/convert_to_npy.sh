@@ -8,7 +8,7 @@
 #SBATCH --error=convert_npy_%j.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
-#SBATCH --time=1-00:00:00
+#SBATCH --time=0-07:00:00
 #SBATCH --mem=40G
 
 
@@ -21,6 +21,10 @@ else
 fi
 
 
+dataset="Dataset111_AutoPet"
+fold="fold_5"
 # 2) Preprocess a new dataset 
-python convert_to_npy.py
+python convert_to_npy.py --nifti_labels_dir $nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/$fold/train_predictions_60/ \
+    --pkl_dir $nnUNet_preprocessed/$dataset/nnUNetPlans_3d_fullres/ \
+    --output_dir $nnUNet_results/$dataset/autoPET3_Trainer__nnUNetResEncUNetLPlansMultiTalent__3d_fullres/$fold/train_predictions_60/converted_segs
 
