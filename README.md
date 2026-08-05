@@ -57,7 +57,7 @@ Accuracy and generalizability were tested on three held-out sets:
 
 ## Authors & Affiliations
 
-Biratal R. Wagle¹, Bashirul A. Biswas¹, Marc A. Seltzer², Matthew E. Maeder², James B. Yu³, Indrani Bhattacharya¹ (corresponding author: `Indrani.Bhattacharya@dartmouth.edu`)
+Biratal R. Wagle¹, Bashirul A. Biswas¹, Grant Chau¹, Marc A. Seltzer², Matthew E. Maeder², James B. Yu³, Indrani Bhattacharya¹ (corresponding author: `Indrani.Bhattacharya@dartmouth.edu`)
 
 1. Department of Biomedical Data Science, Geisel School of Medicine, Dartmouth College
 2. Department of Radiology, Dartmouth-Hitchcock Medical Center
